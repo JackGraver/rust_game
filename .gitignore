@@ -1,0 +1,54 @@
+# === Rust ===
+
+# Ignore Cargo's build output
+/target/
+
+# Ignore Cargo.lock for libraries (not binaries)
+# Uncomment the next line if you're writing a library
+# Cargo.lock
+
+# === General ===
+
+# IDEs/editors
+**/*.swp
+**/*~
+.idea/
+.vscode/
+*.code-workspace
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+# Binaries (optional — add if you output binaries manually)
+*.exe
+*.out
+*.dll
+*.so
+*.dylib
+
+# Coverage/test output (optional)
+/coverage/
+/htmlcov/
+*.profraw
+
+# === Rust tools ===
+
+# Clippy lints
+clippy.toml
+
+# Rustfmt config
+rustfmt.toml
+
+# Dev containers (optional)
+.devcontainer/
+
+# Ignore environment files (if any)
+.env
+
+_old/
+
+ideas.txt
