@@ -1,6 +1,14 @@
+use std::f32::consts::E;
+
+use crate::ecs::systems::coin_collect_system;
+use crate::ecs::systems::coin_collect_system::coin_collect_system;
+use crate::ecs::systems::enemy_hit_system::enemy_hit_system;
+use crate::ecs::systems::enemy_seperation_system::enemy_separation_system;
 use crate::ecs::systems::health_system::health_system;
 use crate::ecs::systems::input_system::player_input_system;
 use crate::ecs::systems::movement_system::movement_system;
+use crate::ecs::systems::new_round_system::new_round_system;
+use crate::ecs::systems::player_death_system::player_death_system;
 use crate::ecs::systems::render_system::render_player_system;
 use crate::ecs::systems::round_manager_system::round_manager_system;
 use crate::ecs::systems::shooter_system::shooter_system;
@@ -16,6 +24,8 @@ use crate::ecs::{
 pub struct Game {
     pub world: World,
     pub is_game_over: bool,
+    avg_fps: i32,
+    fps_count: i32,
 }
 
 impl Game {
@@ -43,29 +53,50 @@ impl Game {
                     max: 100,
                 },
             )
-            .with_shooter(player, Shooter { cooldown: 0.1 });
+            .with_shooter(player, Shooter { cooldown: 0.1 })
+            .with_coins_inventory(player);
 
         Game {
             world,
             is_game_over: false,
+            avg_fps: get_fps(),
+            fps_count: 1,
         }
     }
 
     pub fn update(&mut self) {
-        let delta = get_frame_time();
-
-        round_manager_system(&mut self.world, delta);
-        player_input_system(&mut self.world);
-        movement_system(&mut self.world, delta);
-        health_system(&mut self.world);
-        shooter_system(&mut self.world, delta);
-
-        if self.is_game_over {
+        if player_death_system(&self.world) {
             info!("game over");
+        } else {
+            let delta = get_frame_time();
+
+            round_manager_system(&mut self.world, delta);
+            player_input_system(&mut self.world);
+            movement_system(&mut self.world, delta);
+            health_system(&mut self.world);
+            shooter_system(&mut self.world, delta);
+            enemy_hit_system(&mut self.world);
+            coin_collect_system(&mut self.world);
+            new_round_system(&mut self.world);
+            enemy_separation_system(&mut self.world, delta);
         }
     }
 
-    pub fn draw(&self) {
+    pub fn draw(&mut self) {
+        self.draw_debug();
+        render_player_system(&self.world);
+    }
+
+    pub fn draw_debug(&mut self) {
+        self.fps_count += 1;
+        self.avg_fps += get_fps();
+        draw_text(
+            &format!("FPS: {}", self.avg_fps / self.fps_count),
+            10.0,
+            60.0,
+            30.0,
+            WHITE,
+        );
         draw_text(
             &format!("Entities: {}", self.world.positions.len()),
             10.0,
@@ -73,7 +104,27 @@ impl Game {
             30.0,
             WHITE,
         );
-        render_player_system(&self.world);
+        let collected = self
+            .world
+            .coin_invs
+            .get(&self.world.player_entity)
+            .map(|inv| inv.collected)
+            .unwrap_or(0);
+
+        draw_text(
+            &format!("Collected: {}", collected),
+            10.0,
+            100.0,
+            30.0,
+            WHITE,
+        );
+        draw_text(
+            &format!("Round: {}", self.world.round_num),
+            10.0,
+            140.0,
+            30.0,
+            WHITE,
+        );
     }
 }
 

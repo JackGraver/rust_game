@@ -5,6 +5,7 @@ pub enum GameObjectType {
     Player,
     Bullet,
     Enemy,
+    Coin,
 }
 
 pub struct GameObject {
@@ -25,6 +26,8 @@ pub struct Velocity {
     pub dy: f32,
 }
 
+pub struct Speed(pub f32);
+
 #[derive(Clone, Copy)]
 pub struct Health {
     pub current: i32,
@@ -37,4 +40,8 @@ pub struct Bullet;
 
 pub struct Shooter {
     pub cooldown: f32,
+}
+
+pub struct CoinInv {
+    pub collected: i32,
 }

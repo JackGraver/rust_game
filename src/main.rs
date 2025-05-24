@@ -21,7 +21,6 @@ async fn main() {
 
     loop {
         clear_background(LIGHTGRAY);
-        draw_text(&format!("FPS: {}", get_fps()), 10.0, 60.0, 30.0, WHITE);
         game.update();
         game.draw();
         next_frame().await;
